@@ -1,0 +1,3 @@
+six==1.10.0
+git+https://github.com/muccg/ckanapi.git@streaming-uploads
+requests==2.10.0
