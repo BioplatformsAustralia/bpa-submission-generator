@@ -4,6 +4,7 @@ import argparse
 import sys
 
 from .util import make_logger, make_ckan_api
+from .projects.base.submission import BASE
 
 
 logger = make_logger(__name__)
@@ -27,13 +28,9 @@ def usage(parser):
     sys.exit(0)
 
 
-def base_ncbi(ckan, args):
-    pass
-
-
 def main():
     funcs = {
-        'base-ncbi': base_ncbi,
+        'base-ncbi': BASE,
     }
 
     parser = argparse.ArgumentParser()

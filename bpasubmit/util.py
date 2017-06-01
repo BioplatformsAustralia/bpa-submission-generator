@@ -37,3 +37,8 @@ def authenticated_ckan_session(ckan):
     if 'field-login' in r.text:
         raise RuntimeError('Login failed.')
     return s
+
+
+def ckan_packages_of_type(ckan, typ, limit=10000):
+    # 10,000 is hard-coded in the BPA version of CKAN (upped from default limit of 1,000
+    return ckan.action.package_search(q='type:%s' % typ, include_private=True, rows=limit)['results']

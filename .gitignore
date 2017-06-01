@@ -1,6 +1,8 @@
 .*swp
 *.pyc
 *.pyo
+*.csv
+*.tsv
 .vscode/
 .DS_Store
 __pycache__
