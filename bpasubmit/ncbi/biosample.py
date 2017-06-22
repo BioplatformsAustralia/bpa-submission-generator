@@ -43,8 +43,9 @@ class NCBIBioSampleMetagenomeEnvironmental(object):
         each row in `rows` must be a dictionary with keys corresponding to the fields member of
         this class, plus any `custom_fields` provided
         """
-        fd.write(cls.ncbi_template)
+        # note: the NCBI template uses DOS linefeeds
+        fd.write(cls.ncbi_template.replace('\n', '\r\n'))
         fd.write('\t'.join((cls.ncbi_field_header,) + custom_fields))
-        fd.write('\n')
+        fd.write('\r\n')
         writer = csv.DictWriter(fd, cls.fields + custom_fields, dialect='excel-tab')
         writer.writerows(rows)
