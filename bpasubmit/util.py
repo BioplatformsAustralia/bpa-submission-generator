@@ -42,3 +42,19 @@ def authenticated_ckan_session(ckan):
 def ckan_packages_of_type(ckan, typ, limit=10000):
     # 10,000 is hard-coded in the BPA version of CKAN (upped from default limit of 1,000
     return ckan.action.package_search(q='type:%s' % typ, include_private=True, rows=limit)['results']
+
+
+def common_values(dicts):
+    """
+    given a list of dicts, return a dict with only the values shared
+    in common between those dicts
+    """
+    all_keys = set()
+    for d in dicts:
+        all_keys = all_keys.union(set(d.keys()))
+    r = {}
+    for k in all_keys:
+        vals = set([d.get(k) for d in dicts])
+        if len(vals) == 1:
+            r[k] = dicts[0][k]
+    return r
