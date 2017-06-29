@@ -33,6 +33,13 @@ class BASE(object):
         for obj in sorted(packages, key=lambda obj: int(obj['bpa_id'].rsplit('.', 1)[1])):
             yield obj
 
+    @classmethod
+    def resources_to_submit(cls, resources):
+        for resource_obj in resources:
+            if resource_obj.get('ncbi_file_uploaded') == 'True':
+                continue
+            yield resource_obj
+
     def ncbi_metagenome_objects(self):
         def represent_depth(depth):
             # some are floating point values, but we need to integer-f
@@ -82,7 +89,7 @@ class BASE(object):
         for obj in self.packages_to_submit(self.amplicons):
             bpa_id_slash = '/'.join(obj['bpa_id'].rsplit('.', 1))
             file_info = []
-            for resource_obj in obj['resources']:
+            for resource_obj in self.resources_to_submit(obj['resources']):
                 if resource_obj['read'] not in ('R1', 'R2'):
                     continue
                 file_info.append(['fastq', resource_obj['url'].rsplit('/', 1)[-1], resource_obj['md5']])
@@ -103,11 +110,8 @@ class BASE(object):
         for obj in self.packages_to_submit(self.metagenomics):
             bpa_id_slash = '/'.join(obj['bpa_id'].rsplit('.', 1))
             file_info = []
-            for resource_obj in obj['resources']:
+            for resource_obj in self.resources_to_submit(obj['resources']):
                 if resource_obj['read'] not in ('R1', 'R2'):
-                    continue
-                if resource_obj.get('ncbi_file_uploaded') is True:
-                    logger.debug('skipped an uploaded file')
                     continue
                 file_info.append(['fastq', resource_obj['url'].rsplit('/', 1)[-1], resource_obj['md5']])
             row_obj = base_obj.copy()
