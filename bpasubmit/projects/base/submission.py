@@ -29,6 +29,14 @@ class BASE(object):
             uniqued.append(common_values(packages))
         return uniqued
 
+    @classmethod
+    def packages_to_submit(cls, packages):
+        for obj in sorted(packages, key=lambda obj: int(obj['bpa_id'].rsplit('.', 1)[1])):
+            biosample_accession = obj.get('ncbi_biosample_accession', '')
+            # if biosample_accession:
+            #     continue
+            yield obj
+
     def ncbi_metagenome_objects(self):
         def ncbi_lat_lon(obj):
             spatial_json = obj.get('spatial')
@@ -61,7 +69,7 @@ class BASE(object):
             return '%s_%s' % (bpa_id, represent_depth(depth))
 
         id_depth_metadata = self._build_id_depth_metadata(self.packages)
-        for obj in sorted(id_depth_metadata, key=lambda obj: int(obj['bpa_id'].rsplit('.', 1)[1])):
+        for obj in self.packages_to_submit(id_depth_metadata):
             bpa_id_slash = '/'.join(obj['bpa_id'].rsplit('.', 1))
             depth = obj.get('depth', '')
             yield {
@@ -80,13 +88,20 @@ class BASE(object):
     def ncbi_sra_objects(self):
         # genomics amplicons: each row is a unique (bpa_id, amplicon, flow_cell_id): which happens
         # to be how we modelled things in CKAN
-        for obj in sorted(self.amplicons, key=lambda obj: int(obj['bpa_id'].rsplit('.', 1)[1])):
+        amplicon_read_length = {
+            '16S': '300bp',
+            'A16S': '300bp',
+            'ITS': '300bp',
+            '18S': '150bp',
+        }
+        for obj in self.packages_to_submit(self.amplicons):
             bpa_id_slash = '/'.join(obj['bpa_id'].rsplit('.', 1))
             file_info = []
             for resource_obj in obj['resources']:
                 if resource_obj['read'] not in ('R1', 'R2'):
                     continue
                 file_info.append(['fastq', resource_obj['url'].rsplit('/', 1)[-1], resource_obj['md5']])
+            read_length = amplicon_read_length[obj['amplicon'].upper()]
             yield ({
                 'bioproject_accession': obj.get('ncbi_bioproject_accession', ''),
                 'biosample_accession': obj.get('ncbi_biosample_accession', ''),
@@ -102,18 +117,19 @@ class BASE(object):
                 'design_description': 'http://www.bioplatforms.com/soil-biodiversity/',
                 'reference_genome_assembly': '',
                 'alignment_software': '',
-                'forward_read_length': '',  # FIXME
-                'reverse_read_length': '',  # FIXME
+                'forward_read_length': read_length,
+                'reverse_read_length': read_length,
                 'filetype': 'fastq',
             }, file_info)
         # metagenomics
-        for obj in sorted(self.metagenomics, key=lambda obj: int(obj['bpa_id'].rsplit('.', 1)[1])):
+        for obj in self.packages_to_submit(self.metagenomics):
             bpa_id_slash = '/'.join(obj['bpa_id'].rsplit('.', 1))
             file_info = []
             for resource_obj in obj['resources']:
                 if resource_obj['read'] not in ('R1', 'R2'):
                     continue
                 file_info.append(['fastq', resource_obj['url'].rsplit('/', 1)[-1], resource_obj['md5']])
+            read_length = '150bp'
             yield ({
                 'bioproject_accession': obj.get('ncbi_bioproject_accession', ''),
                 'biosample_accession': obj.get('ncbi_biosample_accession', ''),
@@ -129,8 +145,8 @@ class BASE(object):
                 'design_description': 'http://www.bioplatforms.com/soil-biodiversity/',
                 'reference_genome_assembly': '',
                 'alignment_software': '',
-                'forward_read_length': '',  # FIXME
-                'reverse_read_length': '',  # FIXME
+                'forward_read_length': read_length,
+                'reverse_read_length': read_length,
                 'filetype': 'fastq',
             }, file_info)
 
