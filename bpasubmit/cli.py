@@ -5,6 +5,7 @@ import sys
 
 from .util import make_logger, make_ckan_api
 from .projects.base.submission import BASE
+from .projects.mm.submission import MarineMicrobes
 
 
 logger = make_logger(__name__)
@@ -31,6 +32,7 @@ def usage(parser):
 def main():
     funcs = {
         'base-ncbi': BASE,
+        'mm-ncbi': MarineMicrobes,
     }
 
     parser = argparse.ArgumentParser()

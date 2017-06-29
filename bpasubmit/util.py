@@ -1,4 +1,5 @@
 import logging
+import json
 import os
 
 import ckanapi
@@ -58,3 +59,20 @@ def common_values(dicts):
         if len(vals) == 1:
             r[k] = dicts[0][k]
     return r
+
+
+def ckan_spatial_to_ncbi_lat_lon(obj):
+    spatial_json = obj.get('spatial')
+    if not spatial_json:
+        return ''
+    spatial = json.loads(spatial_json)
+    lng, lat = spatial['coordinates']
+    n_s = 'N'
+    if lat < 0:
+        lat = abs(lat)
+        n_s = 'S'
+    e_w = 'E'
+    if lng < 0:
+        lng = abs(lng)
+        e_w = 'W'
+    return '%f %s %f %s' % (lat, n_s, lng, e_w)
