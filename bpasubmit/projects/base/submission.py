@@ -64,7 +64,7 @@ class BASE(object):
                 'collection_date': obj.get('date_sampled', '2015'),
                 'geo_loc_name': '%s: %s' % (obj.get('geo_loc_name', 'Australia'), obj.get('location_description', '')),
                 'lat_lon': ckan_spatial_to_ncbi_lat_lon(obj),
-                'bioproject_accession': obj.get('ncbi_bioproject_accession', ''),
+                'bioproject_accession': 'PRJNA317932',  # obj.get('ncbi_bioproject_accession', ''),
                 'depth': depth,
                 'isolate': generate_isolate(bpa_id_slash, depth),
                 # constant values: FIXME, put these in CKAN once confirmed correct
