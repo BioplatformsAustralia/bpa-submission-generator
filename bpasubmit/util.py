@@ -61,10 +61,10 @@ def common_values(dicts):
     return r
 
 
-def ckan_spatial_to_ncbi_lat_lon(obj):
+def ckan_spatial_to_ncbi_lat_lon(obj, default=''):
     spatial_json = obj.get('spatial')
     if not spatial_json:
-        return ''
+        return default
     spatial = json.loads(spatial_json)
     lng, lat = spatial['coordinates']
     n_s = 'N'
@@ -76,3 +76,21 @@ def ckan_spatial_to_ncbi_lat_lon(obj):
         lng = abs(lng)
         e_w = 'W'
     return '%f %s %f %s' % (lat, n_s, lng, e_w)
+
+
+def bpa_id_slash(bpa_id, default=None):
+    """
+    replace the last '.' in bpa_id with a '/'
+    """
+    if not bpa_id:
+        return default
+    return '/'.join(bpa_id.rsplit('.', 1))
+
+
+def bpa_id_short(bpa_id, default=None):
+    """
+    short version of a bpa_id, the number after the last '.'
+    """
+    if not bpa_id:
+        return default
+    return bpa_id.split('.')[-1]
