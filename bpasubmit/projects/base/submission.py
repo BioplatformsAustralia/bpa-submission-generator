@@ -76,7 +76,8 @@ class BASE(object):
             #depth = obj.get('depth', '')
             yield {
                 'sample_name': bpa_id_slash(obj['bpa_id'], 'MANDATORY'),
-                'collection_date': obj.get('date_sampled', 'MANDATORY'),
+                # TODO default hard coded default date
+                'collection_date': obj.get('date_sampled', '2015'),
                 # TODO in MM this is coming from geo_loc
                 'geo_loc_name': '%s: %s' % (obj.get('geo_loc_name', 'Australia'), obj.get('location_description', '')),
                 'lat_lon': ckan_spatial_to_ncbi_lat_lon(obj, 'MANDATORY'),
