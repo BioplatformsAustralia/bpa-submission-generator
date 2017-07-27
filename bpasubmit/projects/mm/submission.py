@@ -155,10 +155,10 @@ class MarineMicrobes(object):
             row_obj.update({
                 'biosample_accession': obj.get('ncbi_biosample_accession', ''),
                 'sample_name': bpa_id_slash(obj['bpa_id']),
-                'library_ID': '%s' % (bpa_id_short(['bpa_id'])),
+                'library_ID': '%s' % (bpa_id_short(obj['bpa_id'])),
                 # TODO hard coded values
                 'title/short description': 'Marine_metagenomics',
-                'library_strategy': 'METAGENOMICS',
+                'library_strategy': 'WGS',
                 'library_source': 'METAGENOMICS',
                 'instrument_model': obj.get('sequencer', ''),
                 'forward_read_length': obj['read_length'],
@@ -178,7 +178,7 @@ class MarineMicrobes(object):
                 'library_ID': '%s' % (bpa_id_short(obj['bpa_id'])),
                 'title/short description': 'Marine_metatranscriptome',
                 # TODO hard coded values
-                'library_strategy': 'METATRANSCRIPTOME',
+                'library_strategy': 'RNA-Seq',
                 'library_source': 'METATRANSCRIPTOME',
                 'instrument_model': obj.get('sequencer', ''),
                 'forward_read_length': obj['read_length'],
