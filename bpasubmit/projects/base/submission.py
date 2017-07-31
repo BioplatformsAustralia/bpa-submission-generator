@@ -109,7 +109,7 @@ class BASE(object):
                 # TODO hard coded values
                 'title/short description': 'Soil_metagenomics',
                 'library_strategy': 'WGS',
-                'library_source': 'METAGENOMICS',
+                'library_source': 'METAGENOMIC',
                 # TODO in MM this is coming from sequencer
                 'instrument_model': obj.get('library_construction_protocol', ''),
             }
