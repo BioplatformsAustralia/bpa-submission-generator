@@ -111,7 +111,7 @@ class BASE(object):
                 'library_strategy': 'WGS',
                 'library_source': 'METAGENOMIC',
                 # TODO in MM this is coming from sequencer
-                'instrument_model': obj.get('library_construction_protocol', ''),
+                'instrument_model': obj.get('sequencer', ''),
             }
 
         def resource_file_info(resources):
