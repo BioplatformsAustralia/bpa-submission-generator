@@ -104,6 +104,10 @@ class BASE(object):
             }
 
         def metagenomic_specific(obj):
+            instrument_model = obj.get('sequencer', '')
+            if instrument_model == 'HiSeq2500':
+                logger.warn('Rename (instrument_model) bpa_id: {0} id: {1}'.format(obj.get('bpa_id'), obj.get('id')))
+                instrument_model = 'Illumina HiSeq 2500'
             return {
                 'library_ID': '%s_%s' % (bpa_id_short(obj['bpa_id']), obj['flow_id']),
                 # TODO hard coded values
@@ -111,7 +115,7 @@ class BASE(object):
                 'library_strategy': 'WGS',
                 'library_source': 'METAGENOMIC',
                 # TODO in MM this is coming from sequencer
-                'instrument_model': obj.get('sequencer', ''),
+                'instrument_model': instrument_model,
             }
 
         def resource_file_info(resources):
