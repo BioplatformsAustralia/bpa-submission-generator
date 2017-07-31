@@ -15,6 +15,8 @@ def make_logger(name):
     logger.addHandler(handler)
     return logger
 
+logger = make_logger(__name__)
+
 
 def make_ckan_api(args):
     ckan = ckanapi.RemoteCKAN(args.ckan_url, apikey=args.api_key)

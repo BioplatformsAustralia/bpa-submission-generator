@@ -1,5 +1,9 @@
 
 import csv
+import itertools
+from ..util import make_logger
+
+logger = make_logger(__name__)
 
 
 class NCBISRASubtemplate(object):
@@ -24,6 +28,23 @@ class NCBISRASubtemplate(object):
         'filetype',
         'filename',
         'MD5_checksum')
+
+    chunk_size = 500
+
+    @classmethod
+    def chunk_write(cls, custom_fields, base_filename, rows):
+        """
+        write out n files with cls.chunk_size rows
+        """
+        # TODO there is probably a more pythonic way of doing this
+        chunk = 0
+        rows_chunk = list(itertools.islice(rows, cls.chunk_size))
+        while rows_chunk:
+            logger.info(len(rows_chunk))
+            chunk += 1
+            with open('{0}-{1}.csv'.format(base_filename, chunk), 'w') as fd:
+                cls.write(custom_fields, fd, rows_chunk)
+            rows_chunk = list(itertools.islice(rows, cls.chunk_size))
 
     @classmethod
     def write(cls, custom_fields, fd, rows):

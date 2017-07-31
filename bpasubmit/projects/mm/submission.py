@@ -108,6 +108,35 @@ class MarineMicrobes(object):
 
     def ncbi_sra_objects(self):
 
+        def amplicon_specific(obj):
+            # genomics amplicons: each row is a unique (bpa_id, amplicon, flow_cell_id): which happens
+            # to be how we modelled things in CKAN
+            return {
+                'library_ID': '%s_%s_%s' % (bpa_id_short(obj['bpa_id']), obj['amplicon'].upper(), obj['flow_id']),
+                # TODO hard coded values
+                'title/short description': 'Marine_amplicon',
+                'library_strategy': 'AMPLICON',
+                'library_source': 'GENOMIC',
+            }
+
+        def metagenomic_specific(obj):
+            return {
+                'library_ID': bpa_id_slash(obj['bpa_id']),
+                # TODO hard coded values
+                'title/short description': 'Marine_metagenomics',
+                'library_strategy': 'WGS',
+                'library_source': 'METAGENOMICS',
+            }
+
+        def metatranscriptome_specific(obj):
+            return {
+                'library_ID': bpa_id_slash(obj['bpa_id']),
+                # TODO hard coded values
+                'title/short description': 'Marine_metatranscriptome',
+                'library_strategy': 'RNA-Seq',
+                'library_source': 'METATRANSCRIPTOME',
+            }
+
         def resource_file_info(resources):
             rval = []
             for resource_obj in resources:
@@ -124,72 +153,36 @@ class MarineMicrobes(object):
             'library_selection': 'PCR',
             'library_layout': 'paired',
             'platform': 'ILLUMINA',
+            'filetype': 'fastq',
         }
 
-        # genomics amplicons: each row is a unique (bpa_id, amplicon, flow_cell_id): which happens
-        # to be how we modelled things in CKAN
-        for obj in self.packages_to_submit(self.amplicons):
+        for obj in self.packages_to_submit(self.packages):
             file_info = resource_file_info(self.resources_to_submit(obj['resources']))
             row_obj = base_obj.copy()
             row_obj.update({
                 'biosample_accession': obj.get('ncbi_biosample_accession', ''),
                 'sample_name': bpa_id_slash(obj['bpa_id']),
-                'library_ID': '%s_%s_%s' % (bpa_id_short(obj['bpa_id']), obj['amplicon'].upper(), obj['flow_id']),
-                # TODO hard coded values
-                'title/short description': 'Marine_amplicon',
-                'library_strategy': 'AMPLICON',
-                'library_source': 'GENOMIC',
-                #'instrument_model': obj.get('analytical_platform', ''),
                 'instrument_model': obj.get('sequencer', ''),
                 'forward_read_length': obj['read_length'],
                 'reverse_read_length': obj['read_length'],
-                # TODO hard coded values
-                'filetype': 'fastq',
             })
-            yield row_obj, file_info
 
-        # metagenomics
-        for obj in self.packages_to_submit(self.metagenomics):
-            file_info = resource_file_info(self.resources_to_submit(obj['resources']))
-            row_obj = base_obj.copy()
-            row_obj.update({
-                'biosample_accession': obj.get('ncbi_biosample_accession', ''),
-                'sample_name': bpa_id_slash(obj['bpa_id']),
-                'library_ID': '%s' % (bpa_id_short(obj['bpa_id'])),
-                # TODO hard coded values
-                'title/short description': 'Marine_metagenomics',
-                'library_strategy': 'WGS',
-                'library_source': 'METAGENOMICS',
-                'instrument_model': obj.get('sequencer', ''),
-                'forward_read_length': obj['read_length'],
-                'reverse_read_length': obj['read_length'],
-                # TODO hard coded values
-                'filetype': 'fastq',
-            })
-            yield row_obj, file_info
+            if obj['type'] == 'mm-genomics-amplicon':
+                row_obj.update(amplicon_specific(obj))
+            elif obj['type'] == 'mm-metagenomics':
+                row_obj.update(metagenomic_specific(obj))
+            elif obj['type'] == 'mm-metatranscriptome':
+                row_obj.update(metatranscriptome_specific(obj))
+            else:
+                logger.error('Skipping (type) bpa_id: {0} id: {1} has-resources: {2}'.format(obj.get('bpa_id'), obj. get('id'), 'resources' in obj))
+                continue
 
-        # metatranscriptome
-        for obj in self.packages_to_submit(self.metatranscriptome):
-            file_info = resource_file_info(self.resources_to_submit(obj['resources']))
-            row_obj = base_obj.copy()
-            row_obj.update({
-                'biosample_accession': obj.get('ncbi_biosample_accession', ''),
-                'sample_name': bpa_id_slash(obj['bpa_id']),
-                'library_ID': '%s' % (bpa_id_short(obj['bpa_id'])),
-                'title/short description': 'Marine_metatranscriptome',
-                # TODO hard coded values
-                'library_strategy': 'RNA-Seq',
-                'library_source': 'METATRANSCRIPTOME',
-                'instrument_model': obj.get('sequencer', ''),
-                'forward_read_length': obj['read_length'],
-                'reverse_read_length': obj['read_length'],
-                # TODO hard coded values
-                'filetype': 'fastq',
-            })
-            yield row_obj, file_info
+            # TODO do we need to yield if there is no file info???
+            if file_info:
+                yield row_obj, file_info
 
     def write_ncbi(self):
-        with open('Metagenome.environmental.1.0-MM.tsv', 'w') as fd:
-            NCBIBioSampleMetagenomeEnvironmental.write(('depth', 'isolate'), fd, self.ncbi_metagenome_objects())
-        with open('SRA_subtemplate_v2-8-MM.csv', 'w') as fd:
-            NCBISRASubtemplate.write(('depth', 'isolate'), fd, self.ncbi_sra_objects())
+        NCBIBioSampleMetagenomeEnvironmental.chunk_write(('depth', 'isolate'),
+                                                         'Metagenome.environmental.1.0-MM',
+                                                         self.ncbi_metagenome_objects())
+        NCBISRASubtemplate.chunk_write(('depth', 'isolate'), 'SRA_subtemplate_v2-8-MM', self.ncbi_sra_objects())

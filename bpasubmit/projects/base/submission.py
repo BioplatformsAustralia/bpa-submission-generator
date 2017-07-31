@@ -72,8 +72,6 @@ class BASE(object):
 
         id_depth_metadata = self._build_id_depth_metadata(self.packages)
         for obj in self.packages_to_submit(id_depth_metadata):
-            #bpa_id_slash = '/'.join(obj['bpa_id'].rsplit('.', 1))
-            #depth = obj.get('depth', '')
             yield {
                 'sample_name': bpa_id_slash(obj['bpa_id'], 'MANDATORY'),
                 # TODO default hard coded default date
@@ -92,6 +90,29 @@ class BASE(object):
             }
 
     def ncbi_sra_objects(self):
+
+        def amplicon_specific(obj):
+            # genomics amplicons: each row is a unique (bpa_id, amplicon, flow_cell_id)
+            return {
+                'library_ID': '%s_%s_%s' % (bpa_id_short(obj['bpa_id']), obj['amplicon'].upper(), obj['flow_id']),
+                # TODO hard coded values
+                'title/short description': 'Soil_amplicon',
+                'library_strategy': 'AMPLICON',
+                'library_source': 'GENOMIC',
+                # TODO in MM this is coming from sequencer
+                'instrument_model': 'Illumina MiSeq',
+            }
+
+        def metagenomic_specific(obj):
+            return {
+                'library_ID': '%s_%s' % (bpa_id_short(obj['bpa_id']), obj['flow_id']),
+                # TODO hard coded values
+                'title/short description': 'Soil_metagenomics',
+                'library_strategy': 'WGS',
+                'library_source': 'METAGENOMICS',
+                # TODO in MM this is coming from sequencer
+                'instrument_model': obj.get('library_construction_protocol', ''),
+            }
 
         def resource_file_info(resources):
             rval = []
@@ -113,47 +134,31 @@ class BASE(object):
 
         }
 
-        # genomics amplicons: each row is a unique (bpa_id, amplicon, flow_cell_id): which happens
-        # to be how we modelled things in CKAN
-        for obj in self.packages_to_submit(self.amplicons):
+        for obj in self.packages_to_submit(self.packages):
             file_info = resource_file_info(self.resources_to_submit(obj['resources']))
             row_obj = base_obj.copy()
             row_obj.update({
                 'biosample_accession': obj.get('ncbi_biosample_accession', ''),
                 'sample_name': bpa_id_slash(obj['bpa_id']),
-                'library_ID': '%s_%s_%s' % (bpa_id_short(obj['bpa_id']), obj['amplicon'].upper(), obj['flow_id']),
-                # TODO hard coded values
-                'title/short description': 'Soil_amplicon',
-                'library_strategy': 'AMPLICON',
-                'library_source': 'GENOMIC',
-                # TODO in MM this is coming from sequencer
-                'instrument_model': 'Illumina MiSeq',
                 'forward_read_length': obj['read_length'],
                 'reverse_read_length': obj['read_length'],
             })
-            yield row_obj, file_info
 
-        # metagenomics
-        for obj in self.packages_to_submit(self.metagenomics):
-            file_info = resource_file_info(self.resources_to_submit(obj['resources']))
-            row_obj = base_obj.copy()
-            row_obj.update({
-                'biosample_accession': obj.get('ncbi_biosample_accession', ''),
-                'sample_name': bpa_id_slash(obj['bpa_id']),
-                'library_ID': '%s_%s' % (bpa_id_short(obj['bpa_id']), obj['flow_id']),
-                # TODO hard coded values
-                'title/short description': 'Soil_metagenomics',
-                'library_strategy': 'WGS',
-                'library_source': 'METAGENOMICS',
-                # TODO in MM this is coming from sequencer
-                'instrument_model': obj.get('library_construction_protocol', ''),
-                'forward_read_length': obj['read_length'],
-                'reverse_read_length': obj['read_length'],
-            })
-            yield row_obj, file_info
+            if obj['type'] == 'base-genomics-amplicon':
+                row_obj.update(amplicon_specific(obj))
+            elif obj['type'] == 'base-metagenomics':
+                row_obj.update(metagenomic_specific(obj))
+            else:
+                logger.error('Skipping (type) bpa_id: {0} id: {1} has-resources: {2}'.format(obj.get('bpa_id'), obj. get('id'),          'resources' in obj))
+                continue
+
+            # TODO do we need to yield if there is no file info???
+            if file_info:
+                yield row_obj, file_info
+
 
     def write_ncbi(self):
-        with open('Metagenome.environmental.1.0-BASE.tsv', 'w') as fd:
-            NCBIBioSampleMetagenomeEnvironmental.write(('depth', 'isolate'), fd, self.ncbi_metagenome_objects())
-        with open('SRA_subtemplate_v2-8-BASE.csv', 'w') as fd:
-            NCBISRASubtemplate.write(('depth', 'isolate'), fd, self.ncbi_sra_objects())
+        NCBIBioSampleMetagenomeEnvironmental.chunk_write(('depth', 'isolate'),
+                                                         'Metagenome.environmental.1.0-BASE',
+                                                         self.ncbi_metagenome_objects())
+        NCBISRASubtemplate.chunk_write(('depth', 'isolate'), 'SRA_subtemplate_v2-8-BASE', self.ncbi_sra_objects())
