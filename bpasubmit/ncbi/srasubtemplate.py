@@ -12,7 +12,7 @@ class NCBISRASubtemplate(object):
         'biosample_accession',
         'sample_name',
         'library_ID',
-        'title/short description',
+        'title',
         'library_strategy',
         'library_source',
         'library_selection',
