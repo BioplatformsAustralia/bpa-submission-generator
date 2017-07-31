@@ -141,9 +141,16 @@ class BASE(object):
         for obj in self.packages_to_submit(self.packages):
             file_info = resource_file_info(self.resources_to_submit(obj['resources']))
             row_obj = base_obj.copy()
+
+            # biosample_accession and sample_name cannot both be set
+            biosample_accession = obj.get('ncbi_biosample_accession', '')
+            sample_name = bpa_id_slash(obj['bpa_id'])
+            if biosample_accession:
+                sample_name = None
+
             row_obj.update({
-                'biosample_accession': obj.get('ncbi_biosample_accession', ''),
-                'sample_name': bpa_id_slash(obj['bpa_id']),
+                'biosample_accession': biosample_accession,
+                'sample_name': sample_name,
                 'forward_read_length': obj['read_length'],
                 'reverse_read_length': obj['read_length'],
             })
