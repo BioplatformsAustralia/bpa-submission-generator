@@ -114,7 +114,7 @@ class MarineMicrobes(object):
             return {
                 'library_ID': '%s_%s_%s' % (bpa_id_short(obj['bpa_id']), obj['amplicon'].upper(), obj['flow_id']),
                 # TODO hard coded values
-                'title/short description': 'Marine_amplicon',
+                'title': 'Marine_amplicon',
                 'library_strategy': 'AMPLICON',
                 'library_source': 'GENOMIC',
             }
@@ -123,7 +123,7 @@ class MarineMicrobes(object):
             return {
                 'library_ID': bpa_id_slash(obj['bpa_id']),
                 # TODO hard coded values
-                'title/short description': 'Marine_metagenomics',
+                'title': 'Marine_metagenomics',
                 'library_strategy': 'WGS',
                 'library_source': 'METAGENOMICS',
             }
@@ -132,7 +132,7 @@ class MarineMicrobes(object):
             return {
                 'library_ID': bpa_id_slash(obj['bpa_id']),
                 # TODO hard coded values
-                'title/short description': 'Marine_metatranscriptome',
+                'title': 'Marine_metatranscriptome',
                 'library_strategy': 'RNA-Seq',
                 'library_source': 'METATRANSCRIPTOME',
             }

@@ -96,7 +96,7 @@ class BASE(object):
             return {
                 'library_ID': '%s_%s_%s' % (bpa_id_short(obj['bpa_id']), obj['amplicon'].upper(), obj['flow_id']),
                 # TODO hard coded values
-                'title/short description': 'Soil_amplicon',
+                'title': 'Soil_amplicon',
                 'library_strategy': 'AMPLICON',
                 'library_source': 'GENOMIC',
                 # TODO in MM this is coming from sequencer
@@ -107,7 +107,7 @@ class BASE(object):
             return {
                 'library_ID': '%s_%s' % (bpa_id_short(obj['bpa_id']), obj['flow_id']),
                 # TODO hard coded values
-                'title/short description': 'Soil_metagenomics',
+                'title': 'Soil_metagenomics',
                 'library_strategy': 'WGS',
                 'library_source': 'METAGENOMIC',
                 # TODO in MM this is coming from sequencer
