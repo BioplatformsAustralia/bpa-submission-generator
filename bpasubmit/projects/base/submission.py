@@ -104,9 +104,14 @@ class BASE(object):
             }
 
         def metagenomic_specific(obj):
+            # TODO hard coded instrument model field. The code is slightly redundant to allow for us to log the
+            # specific issues with the data
             instrument_model = obj.get('sequencer', '')
-            if instrument_model == 'HiSeq2500':
+            if instrument_model == 'HiSeq2500' or instrument_model == 'HiSeq 2500':
                 logger.warn('Rename (instrument_model) bpa_id: {0} id: {1}'.format(obj.get('bpa_id'), obj.get('id')))
+                instrument_model = 'Illumina HiSeq 2500'
+            if not instrument_model:
+                logger.warn('Missing (instrument_model) bpa_id: {0} id: {1}'.format(obj.get('bpa_id'), obj.get('id')))
                 instrument_model = 'Illumina HiSeq 2500'
             return {
                 'library_ID': '%s_%s' % (bpa_id_short(obj['bpa_id']), obj['flow_id']),
