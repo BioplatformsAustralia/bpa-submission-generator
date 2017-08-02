@@ -32,6 +32,16 @@ class NCBISRASubtemplate(object):
     chunk_size = 500
 
     @classmethod
+    def numbered_file_header(cls, count):
+        """
+        return a tuple of count file headers
+        """
+        rval = ('filetype', 'filename', 'MD5_checksum')
+        for i in range(2, count+1):
+            rval = rval + ('filetype' + str(i), 'filename' + str(i), 'MD5_checksum' + str(i))
+        return rval
+
+    @classmethod
     def chunk_write(cls, custom_fields, base_filename, rows):
         """
         write out n files with cls.chunk_size rows
@@ -53,7 +63,8 @@ class NCBISRASubtemplate(object):
         """
         # note: the NCBI template uses DOS linefeeds
         writer = csv.writer(fd)
-        writer.writerow(cls.fields + cls.file_header * 4)
+        #writer.writerow(cls.fields + cls.file_header * 4)
+        writer.writerow(cls.fields + cls.numbered_file_header(4))
         for row_obj, file_objs in rows:
             if not file_objs:
                 continue
