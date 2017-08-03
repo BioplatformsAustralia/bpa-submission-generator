@@ -120,24 +120,47 @@ class MarineMicrobes(object):
                 'title': 'Marine_amplicon',
                 'library_strategy': 'AMPLICON',
                 'library_source': 'GENOMIC',
+                'instrument_model': 'Illumina MiSeq',
             }
 
         def metagenomic_specific(obj):
+            # TODO hard coded instrument model field. The code is slightly redundant to allow for us to log the
+            # specific issues with the data
+            instrument_model = obj.get('sequencer', '')
+            if instrument_model == 'HiSeq2500' or instrument_model == 'HiSeq 2500':
+                logger.warn('Rename (instrument_model) bpa_id: {0} id: {1}'.format(obj.get('bpa_id'), obj.get('id')))
+                instrument_model = 'Illumina HiSeq 2500'
+            if not instrument_model:
+                logger.warn('Missing (instrument_model) bpa_id: {0} id: {1}'.format(obj.get('bpa_id'), obj.get('id')))
+                instrument_model = 'Illumina HiSeq 2500'
+
             return {
                 'library_ID': bpa_id_slash(obj['bpa_id']),
                 # TODO hard coded values
                 'title': 'Marine_metagenomics',
                 'library_strategy': 'WGS',
                 'library_source': 'METAGENOMICS',
+                'instrument_model': instrument_model,
             }
 
         def metatranscriptome_specific(obj):
+            # TODO hard coded instrument model field. The code is slightly redundant to allow for us to log the
+            # specific issues with the data
+            instrument_model = obj.get('sequencer', '')
+            if instrument_model == 'HiSeq2500' or instrument_model == 'HiSeq 2500':
+                logger.warn('Rename (instrument_model) bpa_id: {0} id: {1}'.format(obj.get('bpa_id'), obj.get('id')))
+                instrument_model = 'Illumina HiSeq 2500'
+            if not instrument_model:
+                logger.warn('Missing (instrument_model) bpa_id: {0} id: {1}'.format(obj.get('bpa_id'), obj.get('id')))
+                instrument_model = 'Illumina HiSeq 2500'
+
             return {
                 'library_ID': bpa_id_slash(obj['bpa_id']),
                 # TODO hard coded values
                 'title': 'Marine_metatranscriptome',
                 'library_strategy': 'RNA-Seq',
                 'library_source': 'METATRANSCRIPTOME',
+                'instrument_model': instrument_model,
             }
 
         def resource_file_info(resources):
@@ -162,10 +185,18 @@ class MarineMicrobes(object):
         for obj in self.packages_to_submit(self.packages):
             file_info = resource_file_info(self.resources_to_submit(obj['resources']))
             row_obj = base_obj.copy()
+
+            # biosample_accession and sample_name cannot both be set
+            biosample_accession = obj.get('ncbi_biosample_accession', '')
+            sample_name = bpa_id_slash(obj['bpa_id'])
+            if biosample_accession:
+                sample_name = None
+
             row_obj.update({
-                'biosample_accession': obj.get('ncbi_biosample_accession', ''),
-                'sample_name': bpa_id_slash(obj['bpa_id']),
-                'instrument_model': obj.get('sequencer', ''),
+                'biosample_accession': biosample_accession,
+                'sample_name': sample_name,
+                # TODO received feedback that the values coming from CKAN are not always correct, so we setting them in the _specific methods
+                #'instrument_model': obj.get('sequencer', ''),
                 'forward_read_length': obj['read_length'],
                 'reverse_read_length': obj['read_length'],
             })

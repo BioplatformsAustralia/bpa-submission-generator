@@ -99,7 +99,7 @@ class BASE(object):
                 'title': 'Soil_amplicon',
                 'library_strategy': 'AMPLICON',
                 'library_source': 'GENOMIC',
-                # TODO in MM this is coming from sequencer
+                # TODO hard coded values
                 'instrument_model': 'Illumina MiSeq',
             }
 
@@ -119,7 +119,7 @@ class BASE(object):
                 'title': 'Soil_metagenomics',
                 'library_strategy': 'WGS',
                 'library_source': 'METAGENOMIC',
-                # TODO in MM this is coming from sequencer
+                # TODO hard coded values
                 'instrument_model': instrument_model,
             }
 
