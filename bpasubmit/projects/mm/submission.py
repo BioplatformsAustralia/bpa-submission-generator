@@ -33,6 +33,9 @@ class MarineMicrobes(object):
     def packages_to_submit(cls, packages):
 
         # TODO hardcoded filter
+        # during the development of the submission there was some back and forth as to what data was to be included
+        # So at various points this filter was active and inactive (set to None)
+        #
         # This may be redundant depending on the definition of all sample types
         package_filter = None
         #package_filter = [('sample_type','Pelagic'),('sample_type','Sediment')]
