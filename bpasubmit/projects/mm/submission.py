@@ -139,7 +139,7 @@ class MarineMicrobes(object):
                 # TODO hard coded values
                 'title': 'Marine_metagenomics',
                 'library_strategy': 'WGS',
-                'library_source': 'METAGENOMICS',
+                'library_source': 'METAGENOMIC',
                 'instrument_model': instrument_model,
             }
 

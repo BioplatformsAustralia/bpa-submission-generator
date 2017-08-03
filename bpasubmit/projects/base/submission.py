@@ -72,6 +72,14 @@ class BASE(object):
 
         id_depth_metadata = self._build_id_depth_metadata(self.packages)
         for obj in self.packages_to_submit(id_depth_metadata):
+
+            # Request NOT to include biosample entries where a biosample_accession already exists
+            biosample_accession = obj.get('ncbi_biosample_accession', '')
+            if biosample_accession:
+                #logger.info('Skipping (ncbi_biosample_accession) package_id: {0} id: {1} biosample_accession: {2}'.format(obj.get('package_id'), obj['id'], biosample_accession))
+                logger.info('Skipping (ncbi_biosample_accession) package_id: {0} biosample_accession: {1}'.format(obj.get('id'), biosample_accession))
+                continue
+
             yield {
                 'sample_name': bpa_id_slash(obj['bpa_id'], 'MANDATORY'),
                 # TODO default hard coded default date
