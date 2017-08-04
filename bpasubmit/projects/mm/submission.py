@@ -115,7 +115,7 @@ class MarineMicrobes(object):
             # genomics amplicons: each row is a unique (bpa_id, amplicon, flow_cell_id): which happens
             # to be how we modelled things in CKAN
             return {
-                'library_ID': '%s_%s_%s' % (bpa_id_short(obj['bpa_id']), obj['amplicon'].upper(), obj['flow_id']),
+                'library_ID': '%s_%s_%s' % (bpa_id_short(obj['bpa_id']), obj['amplicon'].upper(), obj['mm_amplicon_linkage']),
                 # TODO hard coded values
                 'title': 'Marine_amplicon',
                 'library_strategy': 'AMPLICON',
