@@ -38,7 +38,7 @@ class MarineMicrobes(object):
         #
         # This may be redundant depending on the definition of all sample types
         package_filter = None
-        #package_filter = [('sample_type','Pelagic'),('sample_type','Sediment')]
+        # package_filter = [('sample_type','Pelagic'),('sample_type','Sediment')]
 
         for obj in sorted(packages, key=lambda obj: int(bpa_id_short(obj['bpa_id']))):
 
@@ -196,7 +196,7 @@ class MarineMicrobes(object):
                 'biosample_accession': biosample_accession,
                 'sample_name': sample_name,
                 # TODO received feedback that the values coming from CKAN are not always correct, so we setting them in the _specific methods
-                #'instrument_model': obj.get('sequencer', ''),
+                # 'instrument_model': obj.get('sequencer', ''),
                 'forward_read_length': obj['read_length'],
                 'reverse_read_length': obj['read_length'],
             })

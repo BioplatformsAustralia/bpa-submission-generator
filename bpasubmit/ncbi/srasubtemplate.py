@@ -37,7 +37,7 @@ class NCBISRASubtemplate(object):
         return a tuple of count file headers
         """
         rval = ('filetype', 'filename', 'MD5_checksum')
-        for i in range(2, count+1):
+        for i in range(2, count + 1):
             rval = rval + ('filetype' + str(i), 'filename' + str(i), 'MD5_checksum' + str(i))
         return rval
 
@@ -63,7 +63,7 @@ class NCBISRASubtemplate(object):
         """
         # note: the NCBI template uses DOS linefeeds
         writer = csv.writer(fd)
-        #writer.writerow(cls.fields + cls.file_header * 4)
+        # writer.writerow(cls.fields + cls.file_header * 4)
         writer.writerow(cls.fields + cls.numbered_file_header(4))
         for row_obj, file_objs in rows:
             if not file_objs:

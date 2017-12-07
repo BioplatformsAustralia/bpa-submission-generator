@@ -76,7 +76,7 @@ class BASE(object):
             # Request NOT to include biosample entries where a biosample_accession already exists
             biosample_accession = obj.get('ncbi_biosample_accession', '')
             if biosample_accession:
-                #logger.info('Skipping (ncbi_biosample_accession) package_id: {0} id: {1} biosample_accession: {2}'.format(obj.get('package_id'), obj['id'], biosample_accession))
+                # logger.info('Skipping (ncbi_biosample_accession) package_id: {0} id: {1} biosample_accession: {2}'.format(obj.get('package_id'), obj['id'], biosample_accession))
                 logger.info('Skipping (ncbi_biosample_accession) package_id: {0} biosample_accession: {1}'.format(obj.get('id'), biosample_accession))
                 continue
 
@@ -173,13 +173,12 @@ class BASE(object):
             elif obj['type'] == 'base-metagenomics':
                 row_obj.update(metagenomic_specific(obj))
             else:
-                logger.error('Skipping (type) bpa_id: {0} id: {1} has-resources: {2}'.format(obj.get('bpa_id'), obj. get('id'),          'resources' in obj))
+                logger.error('Skipping (type) bpa_id: {0} id: {1} has-resources: {2}'.format(obj.get('bpa_id'), obj. get('id'), 'resources' in obj))
                 continue
 
             # TODO do we need to yield if there is no file info???
             if file_info:
                 yield row_obj, file_info
-
 
     def write_ncbi(self):
         NCBIBioSampleMetagenomeEnvironmental.chunk_write(('depth', 'isolate'),
