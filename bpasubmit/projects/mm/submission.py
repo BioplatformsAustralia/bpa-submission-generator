@@ -2,6 +2,7 @@ from collections import defaultdict
 from ...util import bpa_id_short, bpa_id_slash, make_logger, ckan_packages_of_type, common_values, ckan_spatial_to_ncbi_lat_lon
 from ...ncbi.biosample import NCBIBioSampleMetagenomeEnvironmental
 from ...ncbi.srasubtemplate import NCBISRASubtemplate
+from ...ncbi import write_sra_biosample
 
 logger = make_logger(__name__)
 
@@ -228,7 +229,10 @@ class MarineMicrobes(object):
                 yield row_obj, file_info
 
     def write_ncbi(self):
-        sample_submission_info = NCBIBioSampleMetagenomeEnvironmental.chunk_write(
-            ('depth', 'isolate'), 'Metagenome.environmental.1.0-MM', self.ncbi_metagenome_objects())
-        NCBISRASubtemplate.chunk_write(
-            ('depth', 'isolate'), 'SRA_subtemplate_v2-8-MM', self.ncbi_sra_objects(), sample_submission_info)
+        write_sra_biosample(
+            biosample_custom_fields=('depth', 'isolate'),
+            biosample_base='Metagenome.environmental.1.0-MM',
+            biosample_rows=self.ncbi_metagenome_objects(),
+            sra_custom_fields=('depth', 'isolate'),
+            sra_base='SRA_subtemplate_v2-8-MM',
+            sra_rows=self.ncbi_sra_objects())

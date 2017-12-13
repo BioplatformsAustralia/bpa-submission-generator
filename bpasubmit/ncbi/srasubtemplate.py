@@ -43,31 +43,6 @@ class NCBISRASubtemplate(object):
         return rval
 
     @classmethod
-    def chunk_write(cls, custom_fields, base_filename, rows, biosample_chunks):
-        """
-        write out n files with cls.chunk_size rows.
-        output files are set up to correspond with any biosample submission
-        files, if relevant.
-        """
-
-        # bin rows by biosample chunk; there'll be a bin for None which is fine,
-        # they just don't depend on biosample submissions at all
-        bins = defaultdict(list)
-        for row_obj, file_objs in rows:
-            bins[biosample_chunks.get(row_obj['sample_name'], 'NA')].append((row_obj, file_objs))
-        
-        for biosample_filenum, bin_rows in bins.items():
-            # TODO there is probably a more pythonic way of doing this
-            chunk = 0
-            it = iter(bin_rows)
-            rows_chunk = list(itertools.islice(it, cls.chunk_size))
-            while rows_chunk:
-                chunk += 1
-                with open('{}-{}.{}.csv'.format(base_filename, biosample_filenum, chunk), 'w') as fd:
-                    cls.write(custom_fields, fd, rows_chunk)
-                rows_chunk = list(itertools.islice(it, cls.chunk_size))
-
-    @classmethod
     def write(cls, custom_fields, fd, rows):
         """
         write NCBI SRA Subtemplate v2.8
