@@ -50,7 +50,6 @@ class NCBISRASubtemplate(object):
         chunk = 0
         rows_chunk = list(itertools.islice(rows, cls.chunk_size))
         while rows_chunk:
-            logger.info(len(rows_chunk))
             chunk += 1
             with open('{0}-{1}.csv'.format(base_filename, chunk), 'w') as fd:
                 cls.write(custom_fields, fd, rows_chunk)

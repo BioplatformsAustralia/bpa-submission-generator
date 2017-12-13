@@ -34,7 +34,7 @@ class BASE(object):
 
             # TODO hard coded filter
             if not obj.get('spatial'):
-                logger.warn('Skipping (spatial) bpa_id: {0} id: {1} spatial: {2} has-resources: {3}'.format(obj.get('bpa_id'), obj.get('id'), obj.get('spatial'), 'resources' in obj))
+                logger.warn('Skipping package (spatial) bpa_id: {} id: {} spatial: {} has-resources: {}'.format(obj.get('bpa_id'), obj.get('id'), obj.get('spatial'), 'resources' in obj))
                 continue
 
             yield obj
@@ -45,12 +45,16 @@ class BASE(object):
 
             # TODO hard coded filter
             if resource_obj.get('ncbi_file_uploaded') == 'True':
-                logger.debug('Skipping (ncbi_file_uploaded) package_id: {0} id: {1}'.format(resource_obj.get('package_id'), resource_obj['id']))
+                logger.info('Skipping resource (ncbi_file_uploaded) package_id: {0} id: {1}'.format(resource_obj.get('package_id'), resource_obj['id']))
+                continue
+
+            if not resource_obj.get('read'):
+                logger.warn('Skipping resource (read missing) package_id: {0} id: {1} read: {2}'.format(resource_obj.get('package_id'), resource_obj['id'], resource_obj.get('read')))
                 continue
 
             # TODO hardcoded filter on read
             if resource_obj.get('read') not in ('R1', 'R2'):
-                logger.warn('Skipping (read) package_id: {0} id: {1} read: {2}'.format(resource_obj.get('package_id'), resource_obj['id'], resource_obj.get('read')))
+                logger.info('Skipping resource (read) package_id: {0} id: {1} read: {2}'.format(resource_obj.get('package_id'), resource_obj['id'], resource_obj.get('read')))
                 continue
 
             yield resource_obj
@@ -77,7 +81,7 @@ class BASE(object):
             biosample_accession = obj.get('ncbi_biosample_accession', '')
             if biosample_accession:
                 # logger.info('Skipping (ncbi_biosample_accession) package_id: {0} id: {1} biosample_accession: {2}'.format(obj.get('package_id'), obj['id'], biosample_accession))
-                logger.info('Skipping (ncbi_biosample_accession) package_id: {0} biosample_accession: {1}'.format(obj.get('id'), biosample_accession))
+                logger.info('Skipping package (ncbi_biosample_accession) package_id: {0} biosample_accession: {1}'.format(obj.get('id'), biosample_accession))
                 continue
 
             yield {
@@ -173,7 +177,7 @@ class BASE(object):
             elif obj['type'] == 'base-metagenomics':
                 row_obj.update(metagenomic_specific(obj))
             else:
-                logger.error('Skipping (type) bpa_id: {0} id: {1} has-resources: {2}'.format(obj.get('bpa_id'), obj. get('id'), 'resources' in obj))
+                logger.error('Skipping package (type) bpa_id: {0} id: {1} has-resources: {2}'.format(obj.get('bpa_id'), obj. get('id'), 'resources' in obj))
                 continue
 
             # TODO do we need to yield if there is no file info???

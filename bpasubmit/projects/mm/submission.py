@@ -44,7 +44,7 @@ class MarineMicrobes(object):
 
             # TODO hardcoded filter
             if not obj.get('sample_type'):
-                logger.warn('Skipping (sample_type) bpa_id: {0} id: {1} sample_type: {2} has-resources: {3}'.format(obj.get('bpa_id'), obj.get('id'), obj.get('sample_type'), 'resources' in obj))
+                logger.warn('Skipping package (sample_type) bpa_id: {0} id: {1} sample_type: {2} has-resources: {3}'.format(obj.get('bpa_id'), obj.get('id'), obj.get('sample_type'), 'resources' in obj))
                 continue
 
             # filter packages before yielding
@@ -60,7 +60,7 @@ class MarineMicrobes(object):
 
                 if not yielded:
                     # TODO hardcoded reference to filter again
-                    logger.warn('Skipping (sample_type) bpa_id: {0} id: {1} sample_type: {2} has-resources: {3}'.format(obj.get('bpa_id'), obj.get('id'), obj.get('sample_type'), 'resources' in obj))
+                    logger.warn('Skipping package (sample_type) bpa_id: {0} id: {1} sample_type: {2} has-resources: {3}'.format(obj.get('bpa_id'), obj.get('id'), obj.get('sample_type'), 'resources' in obj))
 
     @classmethod
     def resources_to_submit(cls, resources):
@@ -68,12 +68,16 @@ class MarineMicrobes(object):
 
             # TODO hard coded filter on ncbi_file_uploaded
             if resource_obj.get('ncbi_file_uploaded') == 'True':
-                logger.debug('Skipping (ncbi_file_uploaded) package_id: {0} id: {1}'.format(resource_obj.get('package_id'), resource_obj['id']))
+                logger.info('Skipping resource (ncbi_file_uploaded) package_id: {0} id: {1}'.format(resource_obj.get('package_id'), resource_obj['id']))
+                continue
+
+            if not resource_obj.get('read'):
+                logger.warn('Skipping resource (read missing) package_id: {0} id: {1} read: {2}'.format(resource_obj.get('package_id'), resource_obj['id'], resource_obj.get('read')))
                 continue
 
             # TODO hardcoded filter on read
             if resource_obj.get('read') not in ('R1', 'R2'):
-                logger.warn('Skipping (read) package_id: {0} id: {1} read: {2}'.format(resource_obj.get('package_id'), resource_obj['id'], resource_obj.get('read')))
+                logger.info('Skipping resource (read) package_id: {0} id: {1} read: {2}'.format(resource_obj.get('package_id'), resource_obj['id'], resource_obj.get('read')))
                 continue
             yield resource_obj
 
@@ -208,7 +212,7 @@ class MarineMicrobes(object):
             elif obj['type'] == 'mm-metatranscriptome':
                 row_obj.update(metatranscriptome_specific(obj))
             else:
-                logger.error('Skipping (type) bpa_id: {0} id: {1} has-resources: {2}'.format(obj.get('bpa_id'), obj. get('id'), 'resources' in obj))
+                logger.error('Skipping package (type) bpa_id: {0} id: {1} has-resources: {2}'.format(obj.get('bpa_id'), obj. get('id'), 'resources' in obj))
                 continue
 
             # TODO do we need to yield if there is no file info???
