@@ -220,7 +220,7 @@ class MarineMicrobes(object):
                 yield row_obj, file_info
 
     def write_ncbi(self):
-        NCBIBioSampleMetagenomeEnvironmental.chunk_write(('depth', 'isolate'),
-                                                         'Metagenome.environmental.1.0-MM',
-                                                         self.ncbi_metagenome_objects())
-        NCBISRASubtemplate.chunk_write(('depth', 'isolate'), 'SRA_subtemplate_v2-8-MM', self.ncbi_sra_objects())
+        sample_submission_info = NCBIBioSampleMetagenomeEnvironmental.chunk_write(
+            ('depth', 'isolate'), 'Metagenome.environmental.1.0-MM', self.ncbi_metagenome_objects())
+        NCBISRASubtemplate.chunk_write(
+            ('depth', 'isolate'), 'SRA_subtemplate_v2-8-MM', self.ncbi_sra_objects(), sample_submission_info)
