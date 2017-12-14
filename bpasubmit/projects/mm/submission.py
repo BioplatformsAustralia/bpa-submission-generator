@@ -1,7 +1,5 @@
 from collections import defaultdict
 from ...util import bpa_id_short, bpa_id_slash, make_logger, ckan_packages_of_type, common_values, ckan_spatial_to_ncbi_lat_lon
-from ...ncbi.biosample import NCBIBioSampleMetagenomeEnvironmental
-from ...ncbi.srasubtemplate import NCBISRASubtemplate
 from ...ncbi import write_sra_biosample
 
 logger = make_logger(__name__)

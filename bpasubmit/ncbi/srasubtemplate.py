@@ -1,8 +1,6 @@
 
 import csv
-import itertools
 from ..util import make_logger
-from collections import defaultdict
 
 logger = make_logger(__name__)
 

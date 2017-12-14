@@ -13,5 +13,6 @@ dist/
 tmp/
 ref/
 venv/
+cache/
 .#*
 tags
