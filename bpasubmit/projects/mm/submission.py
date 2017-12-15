@@ -1,5 +1,5 @@
 from collections import defaultdict
-from ...util import bpa_id_short, bpa_id_slash, make_logger, ckan_packages_of_type, common_values, ckan_spatial_to_ncbi_lat_lon
+from ...util import bpa_id_short, bpa_id_slash, make_logger, ckan_packages_of_type, common_values, ckan_spatial_to_ncbi_lat_lon, apply_embargo
 from ...ncbi import write_sra_biosample
 
 logger = make_logger(__name__)
@@ -8,9 +8,13 @@ logger = make_logger(__name__)
 class MarineMicrobes(object):
     def __init__(self, ckan, args):
         self.ckan = ckan
-        self.amplicons = ckan_packages_of_type(ckan, 'mm-genomics-amplicon')
-        self.metagenomics = ckan_packages_of_type(ckan, 'mm-metagenomics')
-        self.metatranscriptome = ckan_packages_of_type(ckan, 'mm-metatranscriptome')
+
+        def with_embargo(typ):
+            return apply_embargo(ckan_packages_of_type(ckan, typ), months=3)
+
+        self.amplicons = with_embargo('mm-genomics-amplicon')
+        self.metagenomics = with_embargo('mm-metagenomics')
+        self.metatranscriptome = with_embargo('mm-metatranscriptome')
         self.packages = self.metagenomics + self.amplicons + self.metatranscriptome
         self.write_ncbi()
 

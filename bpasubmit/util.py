@@ -4,6 +4,8 @@ import os
 
 import ckanapi
 import requests
+from dateutil.relativedelta import relativedelta
+import datetime
 
 
 def make_logger(name):
@@ -53,7 +55,7 @@ def ckan_packages_of_type(ckan, typ, limit=10000):
     except IOError:
         data = ckan.action.package_search(q='type:%s' % typ, include_private=True, rows=limit)['results']
         with open(cache_filename, 'w') as fd:
-            json.dump(data, fd)
+            json.dump(data, fd, indent=2, sort_keys=True)
         return data
 
 
@@ -106,3 +108,20 @@ def bpa_id_short(bpa_id, default=None):
     if not bpa_id:
         return default
     return bpa_id.split('.')[-1]
+
+
+def apply_embargo(ckan_packages, months):
+    def within_embargo(package):
+        ingest_date = package.get('archive_ingestion_date')
+        if not ingest_date:
+            logger.error('Skipping package (no archive_ingestion_date) bpa_id: {0} id: {1} archive_ingestion_date: {2} has-resources: {3}'.format(package.get('bpa_id'), package.get('id'), package.get('archive_ingestion_date'), 'resources' in package))
+            return False
+
+        ingest_date = datetime.datetime.strptime(ingest_date, "%Y-%m-%d").date()
+        if ingest_date + relativedelta(months=3) > datetime.date.today():
+            logger.error('Skipping package (embargoed) bpa_id: {0} id: {1} archive_ingestion_date: {2} has-resources: {3}'.format(package.get('bpa_id'), package.get('id'), package.get('archive_ingestion_date'), 'resources' in package))
+            return False
+
+        return True
+
+    return [t for t in ckan_packages if within_embargo(t)]

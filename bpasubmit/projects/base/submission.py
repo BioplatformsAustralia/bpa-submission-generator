@@ -1,5 +1,5 @@
 from collections import defaultdict
-from ...util import bpa_id_short, bpa_id_slash, make_logger, ckan_packages_of_type, common_values, ckan_spatial_to_ncbi_lat_lon
+from ...util import bpa_id_short, bpa_id_slash, make_logger, ckan_packages_of_type, common_values, ckan_spatial_to_ncbi_lat_lon, apply_embargo
 from ...ncbi import write_sra_biosample
 
 logger = make_logger(__name__)
@@ -8,8 +8,12 @@ logger = make_logger(__name__)
 class BASE(object):
     def __init__(self, ckan, args):
         self.ckan = ckan
-        self.metagenomics = ckan_packages_of_type(ckan, 'base-metagenomics')
-        self.amplicons = ckan_packages_of_type(ckan, 'base-genomics-amplicon')
+
+        def with_embargo(typ):
+            return apply_embargo(ckan_packages_of_type(ckan, typ), months=3)
+
+        self.metagenomics = with_embargo('base-metagenomics')
+        self.amplicons = with_embargo('base-genomics-amplicon')
         self.packages = self.metagenomics + self.amplicons
         self.write_ncbi()
 
