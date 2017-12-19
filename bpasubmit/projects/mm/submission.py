@@ -12,9 +12,21 @@ class MarineMicrobes(object):
         def with_embargo(typ):
             return apply_embargo(ckan_packages_of_type(ckan, typ), months=3)
 
-        self.amplicons = with_embargo('mm-genomics-amplicon')
-        self.metagenomics = with_embargo('mm-metagenomics')
-        self.metatranscriptome = with_embargo('mm-metatranscriptome')
+        mandatory_fields = ('date_sampled', 'geo_loc', 'spatial')
+
+        def with_mandatory(packages):
+            r = []
+            for obj in packages:
+                missing = [t for t in mandatory_fields if t not in obj]
+                if missing:
+                    logger.warn('Skipping package (missing_mandatory {}) package_id: {}'.format(str(mandatory_fields), obj.get('id')))
+                    continue
+                r.append(obj)
+            return r
+
+        self.amplicons = with_mandatory(with_embargo('mm-genomics-amplicon'))
+        self.metagenomics = with_mandatory(with_embargo('mm-metagenomics'))
+        self.metatranscriptome = with_mandatory(with_embargo('mm-metatranscriptome'))
         self.packages = self.metagenomics + self.amplicons + self.metatranscriptome
         self.write_ncbi()
 
