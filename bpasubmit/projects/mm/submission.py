@@ -173,7 +173,7 @@ class MarineMicrobes(object):
                 # TODO hard coded values
                 'title': 'Marine_metatranscriptome',
                 'library_strategy': 'RNA-Seq',
-                'library_source': 'METATRANSCRIPTOME',
+                'library_source': 'METATRANSCRIPTOMIC',
                 'instrument_model': instrument_model,
             }
 
