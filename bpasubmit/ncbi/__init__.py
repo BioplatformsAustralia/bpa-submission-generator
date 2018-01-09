@@ -44,7 +44,7 @@ def write_sra_biosample(biosample_custom_fields, biosample_base, biosample_rows,
             NCBIBioSampleMetagenomeEnvironmental.write(biosample_custom_fields, fd, br)
 
         sr = [row_res for row_res in sra_rows if row_res[0]['sample_name'] in sample_ids]
-        sra_filename = '{}-{}.csv'.format(sra_base, output_filenum)
+        sra_filename = '{}-{}.tsv'.format(sra_base, output_filenum)
         with open(sra_filename, 'w') as fd:
             NCBISRASubtemplate.write(sra_custom_fields, fd, sr)
 
@@ -52,6 +52,6 @@ def write_sra_biosample(biosample_custom_fields, biosample_base, biosample_rows,
     sra_existing = [t for t in sra_rows if not t[0]['sample_name']]
     for output_filenum, sr in enumerate(grouper(sra_existing, NCBISRASubtemplate.chunk_size), start=1):
         sr = [t for t in sr if t]
-        sra_filename = '{}-SA{}.csv'.format(sra_base, output_filenum)
+        sra_filename = '{}-SA{}.tsv'.format(sra_base, output_filenum)
         with open(sra_filename, 'w') as fd:
             NCBISRASubtemplate.write(sra_custom_fields, fd, sr)

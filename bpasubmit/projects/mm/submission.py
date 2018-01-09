@@ -1,5 +1,5 @@
 from collections import defaultdict
-from ...util import bpa_id_short, bpa_id_slash, make_logger, ckan_packages_of_type, common_values, ckan_spatial_to_ncbi_lat_lon, apply_embargo
+from ...util import bpa_id_short, bpa_id_slash, make_logger, ckan_packages_of_type, common_values, ckan_spatial_to_ncbi_lat_lon, apply_embargo, fix_instrument_hiseq_model
 from ...ncbi import write_sra_biosample
 
 logger = make_logger(__name__)
@@ -153,13 +153,7 @@ class MarineMicrobes(object):
         def metagenomic_specific(obj):
             # TODO hard coded instrument model field. The code is slightly redundant to allow for us to log the
             # specific issues with the data
-            instrument_model = obj.get('sequencer', '')
-            if instrument_model == 'HiSeq2500' or instrument_model == 'HiSeq 2500':
-                logger.warn('Rename (instrument_model) bpa_id: {0} id: {1}'.format(obj.get('bpa_id'), obj.get('id')))
-                instrument_model = 'Illumina HiSeq 2500'
-            if not instrument_model:
-                logger.warn('Missing (instrument_model) bpa_id: {0} id: {1}'.format(obj.get('bpa_id'), obj.get('id')))
-                instrument_model = 'Illumina HiSeq 2500'
+            instrument_model = fix_instrument_hiseq_model(obj)
 
             return {
                 'library_ID': bpa_id_slash(obj['bpa_id']),
@@ -173,14 +167,7 @@ class MarineMicrobes(object):
         def metatranscriptome_specific(obj):
             # TODO hard coded instrument model field. The code is slightly redundant to allow for us to log the
             # specific issues with the data
-            instrument_model = obj.get('sequencer', '')
-            if instrument_model == 'HiSeq2500' or instrument_model == 'HiSeq 2500':
-                logger.warn('Rename (instrument_model) bpa_id: {0} id: {1}'.format(obj.get('bpa_id'), obj.get('id')))
-                instrument_model = 'Illumina HiSeq 2500'
-            if not instrument_model:
-                logger.warn('Missing (instrument_model) bpa_id: {0} id: {1}'.format(obj.get('bpa_id'), obj.get('id')))
-                instrument_model = 'Illumina HiSeq 2500'
-
+            instrument_model = fix_instrument_hiseq_model(obj)
             return {
                 'library_ID': bpa_id_slash(obj['bpa_id']),
                 # TODO hard coded values

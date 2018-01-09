@@ -46,8 +46,7 @@ class NCBISRASubtemplate(object):
         write NCBI SRA Subtemplate v2.8
         """
         # note: the NCBI template uses DOS linefeeds
-        writer = csv.writer(fd)
-        # writer.writerow(cls.fields + cls.file_header * 4)
+        writer = csv.writer(fd, dialect='excel-tab')
         writer.writerow(cls.fields + cls.numbered_file_header(4))
         for row_obj, file_objs in rows:
             if not file_objs:

@@ -125,3 +125,28 @@ def apply_embargo(ckan_packages, months):
         return True
 
     return [t for t in ckan_packages if within_embargo(t)]
+
+
+def _build_hiseq_fix_map():
+    m = {}
+    _hiseq_prefixes = 'HiSeq', 'HiSeq ', 'Illumina HiSeq', 'Illumina HiSeq '
+    for i in range(2500, 2599):
+        for p in _hiseq_prefixes:
+            m["%s%d" % (p, i)] = ILLUMINA_HISEQ_DEFAULT
+    return m
+
+
+ILLUMINA_HISEQ_DEFAULT = 'Illumina HiSeq 2500'
+_hiseq_fix_map = _build_hiseq_fix_map()
+
+
+def fix_instrument_hiseq_model(obj):
+    original = obj.get('sequencer', '').strip()
+    if not original:
+        renamed = ILLUMINA_HISEQ_DEFAULT
+    else:
+        renamed = _hiseq_fix_map.get(original)
+    if renamed is not None and renamed != original:
+        logger.warn('Rename (instrument_model) bpa_id: {} id: {} ({} -> {})'.format(obj.get('bpa_id'), obj.get('id'), original, renamed))
+        return renamed
+    return original
