@@ -34,7 +34,6 @@ class BASE(object):
     @classmethod
     def packages_to_submit(cls, packages):
         for obj in sorted(packages, key=lambda obj: int(bpa_id_short(obj['bpa_id']))):
-
             # TODO hard coded filter
             if not obj.get('spatial'):
                 logger.warn('Skipping package (spatial) bpa_id: {} id: {} spatial: {} has-resources: {}'.format(obj.get('bpa_id'), obj.get('id'), obj.get('spatial'), 'resources' in obj))

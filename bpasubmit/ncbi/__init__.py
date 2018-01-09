@@ -25,15 +25,15 @@ def write_sra_biosample(biosample_custom_fields, biosample_base, biosample_rows,
     sample_nsrarows = Counter(row['sample_name'] for row, _ in sra_rows if row['sample_name'])
 
     # bin samples into SRA template files where new samples are being uploaded
-    sra_chunks = []
-    chunk = []
+    current_chunk = []
+    sra_chunks = [current_chunk]
     counter = 0
     for sample_id, srarows in sorted(sample_nsrarows.items(), key=lambda kv: int(kv[0].split('/', 1)[-1])):
         if counter + srarows > NCBISRASubtemplate.chunk_size:
-            sra_chunks.append(chunk)
+            current_chunk = []
+            sra_chunks.append(current_chunk)
             counter = 0
-            chunk = []
-        chunk.append(sample_id)
+        current_chunk.append(sample_id)
         counter += srarows
 
     # For each chunk, write out the BioSample and SRA templates

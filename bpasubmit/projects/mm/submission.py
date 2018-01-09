@@ -46,36 +46,12 @@ class MarineMicrobes(object):
 
     @classmethod
     def packages_to_submit(cls, packages):
-
-        # TODO hardcoded filter
-        # during the development of the submission there was some back and forth as to what data was to be included
-        # So at various points this filter was active and inactive (set to None)
-        #
-        # This may be redundant depending on the definition of all sample types
-        package_filter = None
-        # package_filter = [('sample_type','Pelagic'),('sample_type','Sediment')]
-
         for obj in sorted(packages, key=lambda obj: int(bpa_id_short(obj['bpa_id']))):
-
             # TODO hardcoded filter
             if not obj.get('sample_type'):
                 logger.warn('Skipping package (sample_type) bpa_id: {0} id: {1} sample_type: {2} has-resources: {3}'.format(obj.get('bpa_id'), obj.get('id'), obj.get('sample_type'), 'resources' in obj))
                 continue
-
-            # filter packages before yielding
-            if not package_filter:
-                yield obj
-            else:
-                yielded = False
-                for key, value in package_filter:
-                    if obj.get(key) == value:
-                        yield obj
-                        yielded = True
-                        break
-
-                if not yielded:
-                    # TODO hardcoded reference to filter again
-                    logger.warn('Skipping package (sample_type) bpa_id: {0} id: {1} sample_type: {2} has-resources: {3}'.format(obj.get('bpa_id'), obj.get('id'), obj.get('sample_type'), 'resources' in obj))
+            yield obj
 
     @classmethod
     def resources_to_submit(cls, resources):
