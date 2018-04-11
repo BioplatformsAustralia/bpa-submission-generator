@@ -114,7 +114,7 @@ def apply_embargo(ckan_packages, months):
     def within_embargo(package):
         ingest_date = package.get('archive_ingestion_date')
         if not ingest_date:
-            logger.error('Skipping package (no archive_ingestion_date) bpa_id: {0} id: {1} archive_ingestion_date: {2} has-resources: {3}'.format(package.get('bpa_id'), package.get('id'), package.get('archive_ingestion_date'), 'resources' in package))
+            logger.error('Skipping package (no archive_ingestion_date) bpa_id: {} id: {} archive_ingestion_date: {} has-resources: {} ticket: {}'.format(package.get('bpa_id'), package.get('id'), package.get('archive_ingestion_date'), 'resources' in package, package.get('ticket')))
             return False
 
         ingest_date = datetime.datetime.strptime(ingest_date, "%Y-%m-%d").date()
