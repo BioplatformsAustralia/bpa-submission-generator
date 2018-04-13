@@ -39,12 +39,12 @@ def write_sra_biosample(biosample_custom_fields, biosample_base, biosample_rows,
     # For each chunk, write out the BioSample and SRA templates
     for output_filenum, sample_ids in enumerate(sra_chunks, start=1):
         br = [row for row in biosample_rows if row['sample_name'] in sample_ids]
-        biosample_filename = '{}-{}.tsv'.format(biosample_base, output_filenum)
+        biosample_filename = 'output/{}-{}.tsv'.format(biosample_base, output_filenum)
         with open(biosample_filename, 'w') as fd:
             NCBIBioSampleMetagenomeEnvironmental.write(biosample_custom_fields, fd, br)
 
         sr = [row_res for row_res in sra_rows if row_res[0]['sample_name'] in sample_ids]
-        sra_filename = '{}-{}.tsv'.format(sra_base, output_filenum)
+        sra_filename = 'output/{}-{}.tsv'.format(sra_base, output_filenum)
         with open(sra_filename, 'w') as fd:
             NCBISRASubtemplate.write(sra_custom_fields, fd, sr)
 
@@ -52,6 +52,6 @@ def write_sra_biosample(biosample_custom_fields, biosample_base, biosample_rows,
     sra_existing = [t for t in sra_rows if not t[0]['sample_name']]
     for output_filenum, sr in enumerate(grouper(sra_existing, NCBISRASubtemplate.chunk_size), start=1):
         sr = [t for t in sr if t]
-        sra_filename = '{}-SA{}.tsv'.format(sra_base, output_filenum)
+        sra_filename = 'output/{}-SA{}.tsv'.format(sra_base, output_filenum)
         with open(sra_filename, 'w') as fd:
             NCBISRASubtemplate.write(sra_custom_fields, fd, sr)
