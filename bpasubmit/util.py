@@ -100,7 +100,7 @@ def sample_id_slash(sample_id, default=None):
     """
     if not sample_id:
         return default
-    return '/'.join(sample_id.rsplit('.', 1))
+    return '/'.join(sample_id.rsplit('/', 1))
 
 
 def sample_id_short(sample_id, default=None):
@@ -109,7 +109,7 @@ def sample_id_short(sample_id, default=None):
     """
     if not sample_id:
         return default
-    return sample_id.split('.')[-1]
+    return sample_id.split('/')[-1]
 
 
 def apply_embargo(ckan_packages, months):
