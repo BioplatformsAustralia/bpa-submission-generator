@@ -1,5 +1,5 @@
 from collections import defaultdict
-from ...util import bpa_id_short, bpa_id_slash, make_logger, ckan_packages_of_type, common_values, ckan_spatial_to_ncbi_lat_lon, apply_embargo, fix_instrument_hiseq_model
+from ...util import sample_id_short, sample_id_slash, make_logger, ckan_packages_of_type, common_values, ckan_spatial_to_ncbi_lat_lon, apply_embargo, fix_instrument_hiseq_model
 from ...ncbi import write_sra_biosample
 
 logger = make_logger(__name__)
@@ -19,24 +19,25 @@ class BASE(object):
 
     @classmethod
     def _build_id_depth_metadata(cls, packages):
-        # group together by (bpa_id, depth), then take the common values
+        # group together by (sample_id, depth), then take the common values
         by_bpaid_depth = defaultdict(list)
         for package in packages:
             # cooerce to string, so lists and nested objects don't blow up common_values
-            by_bpaid_depth[(package['bpa_id'], package.get('depth', ''))].append(
+            by_bpaid_depth[(package['sample_id'], package.get('depth', ''))].append(
                 dict((t, str(u)) for (t, u) in list(package.items())))
 
         uniqued = []
-        for (bpa_id, depth), packages in list(by_bpaid_depth.items()):
+        for (sample_id, depth), packages in list(by_bpaid_depth.items()):
             uniqued.append(common_values(packages))
         return uniqued
 
     @classmethod
     def packages_to_submit(cls, packages):
-        for obj in sorted(packages, key=lambda obj: int(bpa_id_short(obj['bpa_id']))):
+        for obj in sorted(packages, key=lambda obj: int(sample_id_short(obj['sample_id']))):
             # TODO hard coded filter
             if not obj.get('spatial'):
-                logger.warn('Skipping package (spatial) bpa_id: {} id: {} spatial: {} has-resources: {}'.format(obj.get('bpa_id'), obj.get('id'), obj.get('spatial'), 'resources' in obj))
+                logger.warn('Skipping package (spatial) sample_id: {} id: {} spatial: {} has-resources: {}'.format(
+                    obj.get('sample_id'), obj.get('id'), obj.get('spatial'), 'resources' in obj))
                 continue
 
             yield obj
@@ -47,16 +48,19 @@ class BASE(object):
 
             # TODO hard coded filter
             if resource_obj.get('ncbi_file_uploaded') == 'True':
-                logger.info('Skipping resource (ncbi_file_uploaded) package_id: {0} id: {1}'.format(resource_obj.get('package_id'), resource_obj['id']))
+                logger.info('Skipping resource (ncbi_file_uploaded) package_id: {0} id: {1}'.format(
+                    resource_obj.get('package_id'), resource_obj['id']))
                 continue
 
             if not resource_obj.get('read'):
-                logger.warn('Skipping resource (read missing) package_id: {0} id: {1} read: {2}'.format(resource_obj.get('package_id'), resource_obj['id'], resource_obj.get('read')))
+                logger.warn('Skipping resource (read missing) package_id: {0} id: {1} read: {2}'.format(
+                    resource_obj.get('package_id'), resource_obj['id'], resource_obj.get('read')))
                 continue
 
             # TODO hardcoded filter on read
             if resource_obj.get('read') not in ('R1', 'R2'):
-                logger.info('Skipping resource (read) package_id: {0} id: {1} read: {2}'.format(resource_obj.get('package_id'), resource_obj['id'], resource_obj.get('read')))
+                logger.info('Skipping resource (read) package_id: {0} id: {1} read: {2}'.format(
+                    resource_obj.get('package_id'), resource_obj['id'], resource_obj.get('read')))
                 continue
 
             yield resource_obj
@@ -71,10 +75,10 @@ class BASE(object):
                 # example: "10_20"
                 return depth
 
-        def generate_isolate(bpa_id, depth):
-            if not bpa_id or not depth:
+        def generate_isolate(sample_id, depth):
+            if not sample_id or not depth:
                 return ''
-            return '%s_%s' % (bpa_id_slash(bpa_id), represent_depth(depth))
+            return '%s_%s' % (sample_id_slash(sample_id), represent_depth(depth))
 
         id_depth_metadata = self._build_id_depth_metadata(self.packages)
         for obj in self.packages_to_submit(id_depth_metadata):
@@ -83,20 +87,22 @@ class BASE(object):
             biosample_accession = obj.get('ncbi_biosample_accession', '')
             if biosample_accession:
                 # logger.info('Skipping (ncbi_biosample_accession) package_id: {0} id: {1} biosample_accession: {2}'.format(obj.get('package_id'), obj['id'], biosample_accession))
-                logger.info('Skipping package (ncbi_biosample_accession) package_id: {0} biosample_accession: {1}'.format(obj.get('id'), biosample_accession))
+                logger.info('Skipping package (ncbi_biosample_accession) package_id: {0} biosample_accession: {1}'.format(
+                    obj.get('id'), biosample_accession))
                 continue
 
             yield {
-                'sample_name': bpa_id_slash(obj['bpa_id'], 'MANDATORY'),
+                'sample_name': sample_id_slash(obj['sample_id'], 'MANDATORY'),
                 # TODO default hard coded default date
                 'collection_date': obj.get('date_sampled', '2015'),
                 # TODO in MM this is coming from geo_loc
                 'geo_loc_name': '%s: %s' % (obj.get('geo_loc_name', 'Australia'), obj.get('location_description', '')),
                 'lat_lon': ckan_spatial_to_ncbi_lat_lon(obj, 'MANDATORY'),
                 # TODO hard coded
-                'bioproject_accession': 'PRJNA317932',  # obj.get('ncbi_bioproject_accession', ''),
+                # obj.get('ncbi_bioproject_accession', ''),
+                'bioproject_accession': 'PRJNA317932',
                 'depth': obj.get('depth', ''),
-                'isolate': generate_isolate(obj['bpa_id'], obj.get('depth', '')),
+                'isolate': generate_isolate(obj['sample_id'], obj.get('depth', '')),
                 # TODO hard coded values: FIXME, put these in CKAN once confirmed correct
                 'organism': 'soil metagenome',
                 # TODO in MM this is coming from sample_type
@@ -106,9 +112,9 @@ class BASE(object):
     def ncbi_sra_objects(self):
 
         def amplicon_specific(obj):
-            # genomics amplicons: each row is a unique (bpa_id, amplicon, flow_cell_id)
+            # genomics amplicons: each row is a unique (sample_id, amplicon, flow_cell_id)
             return {
-                'library_ID': '%s_%s_%s' % (bpa_id_short(obj['bpa_id']), obj['amplicon'].upper(), obj['flow_id']),
+                'library_ID': '%s_%s_%s' % (sample_id_short(obj['sample_id']), obj['amplicon'].upper(), obj['flow_id']),
                 # TODO hard coded values
                 'title': 'Soil_amplicon',
                 'library_strategy': 'AMPLICON',
@@ -122,7 +128,7 @@ class BASE(object):
             # specific issues with the data
             instrument_model = fix_instrument_hiseq_model(obj)
             return {
-                'library_ID': '%s_%s' % (bpa_id_short(obj['bpa_id']), obj['flow_id']),
+                'library_ID': '%s_%s' % (sample_id_short(obj['sample_id']), obj['flow_id']),
                 # TODO hard coded values
                 'title': 'Soil_metagenomics',
                 'library_strategy': 'WGS',
@@ -135,12 +141,14 @@ class BASE(object):
             rval = []
             for resource_obj in resources:
                 # TODO hard coded values: resource_obj['Format']?
-                rval.append(['fastq', resource_obj['url'].rsplit('/', 1)[-1], resource_obj['md5']])
+                rval.append(['fastq', resource_obj['url'].rsplit(
+                    '/', 1)[-1], resource_obj['md5']])
             return rval
 
         # TODO hard coded values
         base_obj = {
-            'bioproject_accession': 'PRJNA317932',  # obj.get('ncbi_bioproject_accession', ''), (pending query with AB @ CSIRO)
+            # obj.get('ncbi_bioproject_accession', ''), (pending query with AB @ CSIRO)
+            'bioproject_accession': 'PRJNA317932',
             'library_selection': 'PCR',
             'library_layout': 'paired',
             'platform': 'ILLUMINA',
@@ -152,12 +160,13 @@ class BASE(object):
         }
 
         for obj in self.packages_to_submit(self.packages):
-            file_info = resource_file_info(self.resources_to_submit(obj['resources']))
+            file_info = resource_file_info(
+                self.resources_to_submit(obj['resources']))
             row_obj = base_obj.copy()
 
             # biosample_accession and sample_name cannot both be set
             biosample_accession = obj.get('ncbi_biosample_accession', '')
-            sample_name = bpa_id_slash(obj['bpa_id'])
+            sample_name = sample_id_slash(obj['sample_id'])
             if biosample_accession:
                 sample_name = None
 
@@ -173,7 +182,8 @@ class BASE(object):
             elif obj['type'] == 'base-metagenomics':
                 row_obj.update(metagenomic_specific(obj))
             else:
-                logger.error('Skipping package (type) bpa_id: {0} id: {1} has-resources: {2}'.format(obj.get('bpa_id'), obj. get('id'), 'resources' in obj))
+                logger.error('Skipping package (type) sample_id: {0} id: {1} has-resources: {2}'.format(
+                    obj.get('sample_id'), obj. get('id'), 'resources' in obj))
                 continue
 
             # TODO do we need to yield if there is no file info???
