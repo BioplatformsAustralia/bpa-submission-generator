@@ -7,8 +7,9 @@ setup(author="CCG, Murdoch University",
       keywords="",
       url="https://github.com/muccg/bpa-submission-generator",
       name="bpasubmit",
-      version="1.2.0",
-      packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
+      version="1.2.2",
+      packages=find_packages(
+          exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
       entry_points={
           'console_scripts': [
               'bpa-submit=bpasubmit.cli:main',

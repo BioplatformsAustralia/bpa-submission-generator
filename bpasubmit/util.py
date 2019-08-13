@@ -12,7 +12,8 @@ def make_logger(name):
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
     handler = logging.StreamHandler()
-    fmt = logging.Formatter("%(asctime)s [%(levelname)-7s] [%(threadName)s]  %(message)s")
+    fmt = logging.Formatter(
+        "%(asctime)s [%(levelname)-7s] [%(threadName)s]  %(message)s")
     handler.setFormatter(fmt)
     logger.addHandler(handler)
     return logger
@@ -53,7 +54,8 @@ def ckan_packages_of_type(ckan, typ, limit=10000):
         with open(cache_filename) as fd:
             return json.load(fd)
     except IOError:
-        data = ckan.action.package_search(q='type:%s' % typ, include_private=True, rows=limit)['results']
+        data = ckan.action.package_search(
+            q='type:%s' % typ, include_private=True, rows=limit)['results']
         with open(cache_filename, 'w') as fd:
             json.dump(data, fd, indent=2, sort_keys=True)
         return data
@@ -92,34 +94,37 @@ def ckan_spatial_to_ncbi_lat_lon(obj, default=''):
     return '%f %s %f %s' % (lat, n_s, lng, e_w)
 
 
-def bpa_id_slash(bpa_id, default=None):
+def sample_id_slash(sample_id, default=None):
     """
-    replace the last '.' in bpa_id with a '/'
+    replace the last '.' in sample_id with a '/'
     """
-    if not bpa_id:
+    if not sample_id:
         return default
-    return '/'.join(bpa_id.rsplit('.', 1))
+    return '/'.join(sample_id.rsplit('/', 1))
 
 
-def bpa_id_short(bpa_id, default=None):
+def sample_id_short(sample_id, default=None):
     """
-    short version of a bpa_id, the number after the last '.'
+    short version of a sample_id, the number after the last '.'
     """
-    if not bpa_id:
+    if not sample_id:
         return default
-    return bpa_id.split('.')[-1]
+    return sample_id.split('/')[-1]
 
 
 def apply_embargo(ckan_packages, months):
     def within_embargo(package):
         ingest_date = package.get('archive_ingestion_date')
         if not ingest_date:
-            logger.error('Skipping package (no archive_ingestion_date) bpa_id: {} id: {} archive_ingestion_date: {} has-resources: {} ticket: {}'.format(package.get('bpa_id'), package.get('id'), package.get('archive_ingestion_date'), 'resources' in package, package.get('ticket')))
+            logger.error('Skipping package (no archive_ingestion_date) sample_id: {} id: {} archive_ingestion_date: {} has-resources: {} ticket: {}'.format(
+                package.get('sample_id'), package.get('id'), package.get('archive_ingestion_date'), 'resources' in package, package.get('ticket')))
             return False
 
-        ingest_date = datetime.datetime.strptime(ingest_date, "%Y-%m-%d").date()
+        ingest_date = datetime.datetime.strptime(
+            ingest_date, "%Y-%m-%d").date()
         if ingest_date + relativedelta(months=3) > datetime.date.today():
-            logger.error('Skipping package (embargoed) bpa_id: {0} id: {1} archive_ingestion_date: {2} has-resources: {3}'.format(package.get('bpa_id'), package.get('id'), package.get('archive_ingestion_date'), 'resources' in package))
+            logger.error('Skipping package (embargoed) sample_id: {0} id: {1} archive_ingestion_date: {2} has-resources: {3}'.format(
+                package.get('sample_id'), package.get('id'), package.get('archive_ingestion_date'), 'resources' in package))
             return False
 
         return True
@@ -147,6 +152,7 @@ def fix_instrument_hiseq_model(obj):
     else:
         renamed = _hiseq_fix_map.get(original)
     if renamed is not None and renamed != original:
-        logger.warn('Rename (instrument_model) bpa_id: {} id: {} ({} -> {})'.format(obj.get('bpa_id'), obj.get('id'), original, renamed))
+        logger.warn('Rename (instrument_model) sample_id: {} id: {} ({} -> {})'.format(
+            obj.get('sample_id'), obj.get('id'), original, renamed))
         return renamed
     return original
