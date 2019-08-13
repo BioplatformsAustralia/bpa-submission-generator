@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(author="CCG, Murdoch University",
-      author_email="info@ccg.murdoch.edu.au",
+      author_email="help@bioplatforms.com",
       description="Generate metadata for international submissions",
       license="GPL3",
       keywords="",
