@@ -1,7 +1,0 @@
-version: '2'
-services:
-
-  bpasubmit:
-    build:
-      context: ./
-    image: muccg/bpasubmit:latest
