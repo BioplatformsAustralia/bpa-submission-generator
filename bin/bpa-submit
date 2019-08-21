@@ -1,9 +1,0 @@
-#!/bin/bash
-bpasubmit="docker run --rm \
-                      --interactive \
-                      --tty \
-                      -v "$(pwd):$(pwd)" \
-                      -w $(pwd) \
-                      -it muccg/bpasubmit"
-
-exec $bpasubmit "$@"
