@@ -12,7 +12,7 @@ class MarineMicrobes(object):
         def with_embargo(typ):
             return apply_embargo(ckan_packages_of_type(ckan, typ), months=3)
 
-        mandatory_fields = ('date_sampled', 'geo_loc', 'spatial')
+        mandatory_fields = ('utc_date_sampled', 'geo_loc_name', 'spatial')
 
         def with_mandatory(packages):
             r = []
@@ -72,7 +72,7 @@ class MarineMicrobes(object):
                 continue
 
             # TODO hardcoded filter on read
-            if resource_obj.get('read') not in ('R1', 'R2'):
+            if resource_obj.get('read') not in ('R1', 'R2', 'I1', 'I2'):
                 logger.info('Skipping resource (read) package_id: {0} id: {1} read: {2}'.format(
                     resource_obj.get('package_id'), resource_obj['id'], resource_obj.get('read')))
                 continue
@@ -107,8 +107,8 @@ class MarineMicrobes(object):
 
             yield {
                 'sample_name': sample_id_slash(obj['sample_id'], 'MANDATORY'),
-                'collection_date': obj.get('date_sampled', 'MANDATORY'),
-                'geo_loc_name': obj.get('geo_loc', 'MANDATORY'),
+                'collection_date': obj.get('utc_date_sampled', 'MANDATORY'),
+                'geo_loc_name': obj.get('geo_loc_name', 'MANDATORY'),
                 'lat_lon': ckan_spatial_to_ncbi_lat_lon(obj, 'MANDATORY'),
                 # TODO hard coded bioproject_accession
                 'bioproject_accession': 'PRJNA385736',

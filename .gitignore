@@ -17,3 +17,6 @@ venv/
 cache/
 .#*
 tags
+.idea
+loggingActivity.txt
+*.log
