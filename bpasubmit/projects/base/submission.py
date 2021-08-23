@@ -58,7 +58,7 @@ class BASE(object):
                 continue
 
             # TODO hardcoded filter on read
-            if resource_obj.get('read') not in ('R1', 'R2'):
+            if resource_obj.get('read') not in ('R1', 'R2', 'I1', 'I2'):
                 logger.info('Skipping resource (read) package_id: {0} id: {1} read: {2}'.format(
                     resource_obj.get('package_id'), resource_obj['id'], resource_obj.get('read')))
                 continue
@@ -94,9 +94,9 @@ class BASE(object):
             yield {
                 'sample_name': sample_id_slash(obj['sample_id'], 'MANDATORY'),
                 # TODO default hard coded default date
-                'collection_date': obj.get('date_sampled', '2015'),
+                'collection_date': obj.get('utc_date_sampled', '2015'),
                 # TODO in MM this is coming from geo_loc
-                'geo_loc_name': '%s: %s' % (obj.get('geo_loc_name', 'Australia'), obj.get('location_description', '')),
+                'geo_loc_name': '%s: %s' % (obj.get('geo_loc_name', 'Australia'), obj.get('sample_site_location_description', '')),
                 'lat_lon': ckan_spatial_to_ncbi_lat_lon(obj, 'MANDATORY'),
                 # TODO hard coded
                 # obj.get('ncbi_bioproject_accession', ''),
